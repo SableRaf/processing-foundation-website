@@ -22,6 +22,6 @@ collections:
       # - name: "image"
       #   label: "Image"
       #   widget: "image"
-      - name: "Body"
-        label: "body"
+      - name: "body"
+        label: "Body"
         widget: "markdown"
