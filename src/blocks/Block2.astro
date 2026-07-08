@@ -1,0 +1,12 @@
+---
+import type { block2 } from "../schemas/pages.ts";
+import type { z } from "zod";
+
+type Props = z.infer<typeof block2>;
+const { title, description } = Astro.props;
+---
+
+<section data-block="block2">
+  <h2>{title}</h2>
+  <p>{description}</p>
+</section>

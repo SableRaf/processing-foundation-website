@@ -1,0 +1,26 @@
+{
+  "title": "About",
+  "slug": "about",
+  "blocks": [
+    {
+      "type": "block1",
+      "title": "Welcome to the Processing Foundation",
+      "description": "This is a block1 rendered by the page builder."
+    },
+    {
+      "type": "block3",
+      "title": "Our Mission",
+      "description": "This is a block3, out of order and mixed with the others."
+    },
+    {
+      "type": "block1",
+      "title": "Another Block1",
+      "description": "Blocks can repeat as many times as you like."
+    },
+    {
+      "type": "block2",
+      "title": "Get Involved",
+      "description": "This is a block2 closing out the page."
+    }
+  ]
+}

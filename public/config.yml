@@ -1,27 +1,82 @@
+# AUTO-GENERATED FROM src/schemas/*.ts — DO NOT EDIT BY HAND.
+# Regenerated on every `astro dev` / `astro build`.
+# Edit the Zod schemas in src/schemas/ (or baseConfig in
+# src/lib/generate-config.ts) instead.
+
 backend:
-  name: "github"
-  repo: "designsystemsinternational/processing-foundation-website"
-  branch: "main"
-media_folder: "src/assets/media"
-public_folder: "/needtochangethis"
+  name: github
+  repo: designsystemsinternational/processing-foundation-website
+  branch: main
+media_folder: src/assets/media
+public_folder: /needtochangethis
 collections:
-  - name: "people"
-    label: "People"
-    identifier_field: "name"
-    folder: "src/content/people"
+  - name: people
+    label: People
+    folder: src/content/people
     create: true
+    identifier_field: name
     fields:
-      - name: "name"
-        label: "Name"
-        widget: "string"
-      - name: "roles"
-        label: "Roles"
-        widget: "select"
+      - name: name
+        label: Name
+        widget: string
+      - name: roles
+        label: Roles
+        widget: select
         multiple: true
-        options: ["Board", "Advisor", "Alumn"]
-      # - name: "image"
-      #   label: "Image"
-      #   widget: "image"
-      - name: "body"
-        label: "Body"
-        widget: "markdown"
+        options:
+          - Board
+          - Advisor
+          - Alumn
+      - name: body
+        label: Body
+        widget: markdown
+  - name: pages
+    label: Pages
+    folder: src/content/pages
+    create: true
+    delete: true
+    identifier_field: title
+    extension: json
+    format: json
+    slug: '{{fields.slug}}'
+    fields:
+      - name: title
+        label: Title
+        widget: string
+      - name: slug
+        label: Slug
+        widget: string
+      - name: blocks
+        label: Blocks
+        widget: list
+        types:
+          - name: block1
+            label: Block 1
+            widget: object
+            fields:
+              - name: title
+                label: Title
+                widget: string
+              - name: description
+                label: Description
+                widget: string
+          - name: block2
+            label: Block 2
+            widget: object
+            fields:
+              - name: title
+                label: Title
+                widget: string
+              - name: description
+                label: Description
+                widget: string
+          - name: block3
+            label: Block 3
+            widget: object
+            fields:
+              - name: title
+                label: Title
+                widget: string
+              - name: description
+                label: Description
+                widget: string
