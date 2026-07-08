@@ -1,12 +1,15 @@
 ---
 import type { block1 } from "../schemas/pages.ts";
 import type { z } from "zod";
+import { marked } from "marked";
 
 type Props = z.infer<typeof block1>;
-const { title, description } = Astro.props;
+const { title, description, body } = Astro.props;
+const bodyHtml = body ? await marked.parse(body) : null;
 ---
 
 <section data-block="block1">
   <h2>{title}</h2>
   <p>{description}</p>
+  {bodyHtml && <div class="rich-text" set:html={bodyHtml} />}
 </section>

@@ -20,6 +20,11 @@ export const block1 = z.object({
   type: z.literal("block1"),
   title: z.string(),
   description: z.string(),
+  // A rich-text field. `.meta({ widget })` overrides the default string widget,
+  // so Decap renders a markdown editor and stores markdown source in the JSON.
+  // Optional so pages authored before this field existed still validate; the
+  // generator emits `required: false` in the Decap config.
+  body: z.string().meta({ widget: "markdown" }).optional(),
 });
 
 export const block2 = z.object({

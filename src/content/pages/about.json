@@ -5,7 +5,8 @@
     {
       "type": "block1",
       "title": "Welcome to the Processing Foundation",
-      "description": "This is a block1 rendered by the page builder."
+      "description": "This is a block1 rendered by the page builder.",
+      "body": "## A markdown field\n\nThis text comes from a **markdown** widget in Decap. It supports _emphasis_, [links](https://processingfoundation.org), and lists:\n\n- one\n- two\n- three"
     },
     {
       "type": "block3",
@@ -15,7 +16,8 @@
     {
       "type": "block1",
       "title": "Another Block1",
-      "description": "Blocks can repeat as many times as you like."
+      "description": "Blocks can repeat as many times as you like.",
+      "body": "Each repeated block keeps its own markdown body.\n\n> Including blockquotes."
     },
     {
       "type": "block2",

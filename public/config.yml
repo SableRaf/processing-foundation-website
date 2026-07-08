@@ -60,6 +60,10 @@ collections:
               - name: description
                 label: Description
                 widget: string
+              - name: body
+                label: Body
+                required: false
+                widget: markdown
           - name: block2
             label: Block 2
             widget: object
