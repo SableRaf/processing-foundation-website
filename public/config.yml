@@ -9,13 +9,16 @@ backend:
   branch: main
 local_backend: true
 media_folder: src/assets/media
-public_folder: /needtochangethis
+public_folder: src/assets/media
 collections:
   - name: people
     label: People
     folder: src/content/people
     create: true
     identifier_field: name
+    path: '{{slug}}/index'
+    media_folder: ''
+    public_folder: ''
     fields:
       - name: name
         label: Name

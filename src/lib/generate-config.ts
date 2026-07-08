@@ -166,7 +166,7 @@ const baseConfig = {
   // instead of commiting to Github when it detects it's running localhost.
   local_backend: true,
   media_folder: "src/assets/media",
-  public_folder: "/needtochangethis",
+  public_folder: "src/assets/media",
 };
 
 /** Every schema-backed collection, in CMS display order. */

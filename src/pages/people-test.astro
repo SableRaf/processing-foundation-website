@@ -1,0 +1,35 @@
+---
+// Temporary page to verify CMS-uploaded person images.
+import { getCollection } from "astro:content";
+import { Image } from "astro:assets";
+
+const people = await getCollection("people");
+// Images now live alongside each entry (src/content/people/<slug>/...), so the
+// lookup key has to be built from the entry's own directory, not a shared folder.
+const images = import.meta.glob("/src/content/people/**/*.{jpg,jpeg,png,gif,webp}", {
+  eager: true,
+});
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>People image test</title>
+  </head>
+  <body>
+    <ul>
+      {
+        people.map((person) => {
+          const dir = person.filePath?.slice(0, person.filePath.lastIndexOf("/"));
+          const imgModule = person.data.image ? images[`/${dir}/${person.data.image}`] : null;
+          return (
+            <li>
+              {imgModule && <Image src={imgModule.default} alt={person.data.name} width={200} />}
+              <p>{person.data.name} — {person.data.roles.join(", ")}</p>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </body>
+</html>

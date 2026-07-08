@@ -30,6 +30,11 @@ export const peopleCms = {
   folder: "src/content/people",
   create: true,
   identifier_field: "name",
+  // Each entry gets its own directory, and media_folder/public_folder ""
+  // co-locates uploads there — avoids filename collisions between people.
+  path: "{{slug}}/index",
+  media_folder: "",
+  public_folder: "",
   schema: peopleSchema,
   extraFields: [{ name: "body", label: "Body", widget: "markdown" }],
 };
