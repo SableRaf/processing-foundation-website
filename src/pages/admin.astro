@@ -1,0 +1,25 @@
+---
+/**
+ * Decap CMS admin. This is an .astro page (not a static .html) so the preview
+ * templates in src/lib/cms-previews.ts can be bundled: they import p5 and the
+ * sketch modules, whose built filenames are content-hashed and therefore can't
+ * be hardcoded in plain HTML.
+ */
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <link href="/config.yml" type="text/yaml" rel="cms-config-url" />
+    <title>Content Manager</title>
+  </head>
+  <body>
+    <script is:inline src="https://unpkg.com/decap-cms@^3.1.2/dist/decap-cms.js"></script>
+    <script>
+      import { registerPreviews } from "../lib/cms-previews.ts";
+      registerPreviews();
+    </script>
+  </body>
+</html>

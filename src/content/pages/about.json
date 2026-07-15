@@ -20,6 +20,14 @@
       "body": "Each repeated block keeps its own markdown body.\n\n> Including blockquotes."
     },
     {
+      "type": "p5sketch",
+      "sketch": "flocking",
+      "title": "A p5.js sketch",
+      "caption": "Boids flocking. Authored in src/content/sketches/flocking.js and embedded by an editor from the CMS.",
+      "width": 600,
+      "height": 400
+    },
+    {
       "type": "block2",
       "title": "Get Involved",
       "description": "This is a block2 closing out the page."

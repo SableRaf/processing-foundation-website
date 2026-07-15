@@ -39,14 +39,41 @@ export const block3 = z.object({
   description: z.string(),
 });
 
+/**
+ * Embeds a p5.js sketch. The sketch is authored as a file under
+ * src/content/sketches/ and referenced here by filename, rather than pasted as
+ * code: a sketch runs as JavaScript on the site's own origin, so the set of
+ * runnable sketches stays reviewable in git instead of being editable from the
+ * CMS. Editors choose from the sketches that exist; adding a new one is a PR.
+ */
+export const p5Sketch = z
+  .object({
+    type: z.literal("p5sketch"),
+    // `optionsFrom: "sketches"` fills the dropdown from the filenames in
+    // src/content/sketches at build time, so the CMS offers exactly the
+    // sketches that exist on disk.
+    sketch: z
+      .string()
+      .meta({ widget: "select", label: "Sketch", optionsFrom: "sketches" }),
+    title: z.string().optional(),
+    caption: z.string().optional(),
+    // Intrinsic canvas size. The rendered canvas is scaled down responsively to
+    // fit narrow viewports, so treat these as an aspect ratio + max size.
+    width: z.number().optional(),
+    height: z.number().optional(),
+  })
+  // humanize() would render "p5sketch" as "P 5sketch"; name it explicitly.
+  .meta({ label: "p5.js Sketch" });
+
 /** All block schemas, in the order they appear in the CMS "add block" menu. */
-export const blockSchemas = [block1, block2, block3] as const;
+export const blockSchemas = [block1, block2, block3, p5Sketch] as const;
 
 /** The `blocks` list: any block, any order, repeatable. */
 export const blocksUnion = z.discriminatedUnion("type", [
   block1,
   block2,
   block3,
+  p5Sketch,
 ]);
 
 /** A full page definition. */

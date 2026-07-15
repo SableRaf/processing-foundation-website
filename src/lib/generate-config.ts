@@ -1,4 +1,4 @@
-import { writeFileSync } from "node:fs";
+import { readdirSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dump } from "js-yaml";
 import { pagesCms } from "../schemas/pages.ts";
@@ -26,6 +26,49 @@ type ZodAny = { _zod: { def: any }; meta?: () => Record<string, unknown> | null 
 const def = (schema: ZodAny) => schema._zod.def;
 const readMeta = (schema: ZodAny): Record<string, unknown> =>
   (typeof schema.meta === "function" ? schema.meta() : null) ?? {};
+
+/**
+ * Sketch filenames available to the p5 sketch block's select widget. Read from
+ * disk at config-generation time so the CMS dropdown always offers exactly the
+ * sketches that exist; a sketch added in a PR shows up in the CMS on the next
+ * build, with no second list to update by hand.
+ */
+export function sketchOptions(root?: URL): string[] {
+  const dirUrl = root
+    ? new URL("src/content/sketches/", root)
+    : new URL("../content/sketches/", import.meta.url);
+  try {
+    return readdirSync(fileURLToPath(dirUrl))
+      .filter((f) => f.endsWith(".js"))
+      .map((f) => f.replace(/\.js$/, ""))
+      .sort();
+  } catch {
+    return []; // Directory absent (e.g. before the first sketch is added).
+  }
+}
+
+/**
+ * Named option sources for `.meta({ optionsFrom })` fields. Each returns the
+ * choices for a select widget, read at config-generation time.
+ */
+const optionSources: Record<string, (root?: URL) => string[]> = {
+  sketches: sketchOptions,
+};
+
+/** Project root for the current generation pass; set by buildConfig/writeConfig. */
+let currentRoot: URL | undefined;
+
+/** Resolve a named option source, warning (rather than failing) if unknown. */
+function dynamicOptions(source: string): string[] | undefined {
+  const resolve = optionSources[source];
+  if (!resolve) {
+    console.warn(
+      `[generate-config] Unknown optionsFrom source "${source}"; emitting select with no options.`,
+    );
+    return undefined;
+  }
+  return resolve(currentRoot);
+}
 
 /** "block1" -> "Block 1", "heroTitle" -> "Hero Title", "call_to_action" -> "Call To Action". */
 function humanize(name: string): string {
@@ -81,7 +124,14 @@ function fieldFromSchema(name: string, schema: ZodAny): Record<string, unknown> 
 
   // Explicit widget override via .meta({ widget: "..." }).
   if (typeof meta.widget === "string") {
-    return { ...base, widget: meta.widget, ...(meta.options ? { options: meta.options } : {}) };
+    // `optionsFrom` names a generator that supplies options at build time, for
+    // lists that live on disk rather than in the schema (e.g. sketch files).
+    const options =
+      meta.options ??
+      (typeof meta.optionsFrom === "string"
+        ? dynamicOptions(meta.optionsFrom as string)
+        : undefined);
+    return { ...base, widget: meta.widget, ...(options ? { options } : {}) };
   }
 
   if (d.type === "enum") {
@@ -134,7 +184,10 @@ function variableTypes(union: ZodAny): Array<Record<string, unknown>> {
     const fields = Object.entries(shape)
       .filter(([name]) => name !== discriminator)
       .map(([name, schema]) => fieldFromSchema(name, schema));
-    return { name: typeName, label: humanize(typeName), widget: "object", fields };
+    // A block can name itself via .meta({ label }) on its schema, for names
+    // humanize() can't infer (e.g. "p5sketch" -> "p5.js Sketch").
+    const label = (readMeta(option).label as string) ?? humanize(typeName);
+    return { name: typeName, label, widget: "object", fields };
   });
 }
 
@@ -175,22 +228,27 @@ const collectionDefs: CollectionDef[] = [
   pagesCms as unknown as CollectionDef,
 ];
 
-/** Build the full Decap config object. */
-export function buildConfig() {
-  return {
-    ...baseConfig,
-    collections: collectionDefs.map(buildCollection),
-  };
+/** Build the full Decap config object. `root` resolves on-disk option sources. */
+export function buildConfig(root?: URL) {
+  currentRoot = root;
+  try {
+    return {
+      ...baseConfig,
+      collections: collectionDefs.map(buildCollection),
+    };
+  } finally {
+    currentRoot = undefined;
+  }
 }
 
 /** Serialize the config to YAML with an auto-generated header. */
-export function renderConfigYaml(): string {
+export function renderConfigYaml(root?: URL): string {
   const header =
     "# AUTO-GENERATED FROM src/schemas/*.ts — DO NOT EDIT BY HAND.\n" +
     "# Regenerated on every `astro dev` / `astro build`.\n" +
     "# Edit the Zod schemas in src/schemas/ (or baseConfig in\n" +
     "# src/lib/generate-config.ts) instead.\n\n";
-  return header + dump(buildConfig(), { lineWidth: -1, noRefs: true });
+  return header + dump(buildConfig(root), { lineWidth: -1, noRefs: true });
 }
 
 /**
@@ -202,5 +260,5 @@ export function writeConfig(root?: URL) {
   const outUrl = root
     ? new URL("public/config.yml", root)
     : new URL("../../public/config.yml", import.meta.url);
-  writeFileSync(fileURLToPath(outUrl), renderConfigYaml());
+  writeFileSync(fileURLToPath(outUrl), renderConfigYaml(root));
 }

@@ -5,7 +5,7 @@
 
 backend:
   name: github
-  repo: designsystemsinternational/processing-foundation-website
+  repo: SableRaf/processing-foundation-website
   branch: main
 local_backend: true
 media_folder: src/assets/media
@@ -92,3 +92,28 @@ collections:
               - name: description
                 label: Description
                 widget: string
+          - name: p5sketch
+            label: p5.js Sketch
+            widget: object
+            fields:
+              - name: sketch
+                label: Sketch
+                widget: select
+                options:
+                  - flocking
+              - name: title
+                label: Title
+                required: false
+                widget: string
+              - name: caption
+                label: Caption
+                required: false
+                widget: string
+              - name: width
+                label: Width
+                required: false
+                widget: number
+              - name: height
+                label: Height
+                required: false
+                widget: number

@@ -1,0 +1,116 @@
+---
+import type { p5Sketch } from "../schemas/pages.ts";
+import type { z } from "zod";
+
+type Props = z.infer<typeof p5Sketch>;
+const { sketch, title, caption, width = 600, height = 400 } = Astro.props;
+
+// Sketches are resolved at build time from a fixed directory, so only files
+// committed to the repo can run. Fails the build on an unknown name rather than
+// shipping a page with a silently dead canvas.
+const sketchModules = import.meta.glob("../content/sketches/*.js");
+const sketchPath = `../content/sketches/${sketch}.js`;
+if (!sketchModules[sketchPath]) {
+  const available = Object.keys(sketchModules)
+    .map((p) => p.replace("../content/sketches/", "").replace(/\.js$/, ""))
+    .join(", ");
+  throw new Error(
+    `[P5Sketch] Unknown sketch "${sketch}". Available sketches: ${available || "(none)"}.`,
+  );
+}
+---
+
+<figure data-block="p5sketch">
+  {title && <h2>{title}</h2>}
+  <div
+    class="p5-sketch"
+    data-sketch={sketch}
+    data-width={width}
+    data-height={height}
+    style={`aspect-ratio: ${width} / ${height}; max-width: ${width}px;`}
+  >
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .p5-sketch {
+    width: 100%;
+    margin-inline: auto;
+  }
+  /* Scale the canvas to the container on narrow viewports while preserving the
+     sketch's intrinsic coordinate space. */
+  .p5-sketch :global(canvas) {
+    display: block;
+    width: 100% !important;
+    height: auto !important;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .p5-sketch {
+      /* Sketches are paused for these users; show the first frame only. */
+      outline: none;
+    }
+  }
+</style>
+
+<script>
+  // One glob for all sketches: Vite code-splits each into its own chunk, so a
+  // page only downloads the sketches it actually embeds.
+  const sketchModules = import.meta.glob("../content/sketches/*.js");
+
+  const prefersReducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+
+  async function mount(el: HTMLElement) {
+    const name = el.dataset.sketch;
+    const loader = sketchModules[`../content/sketches/${name}.js`];
+    if (!loader) return;
+
+    // p5 is ~1MB; load it only once a sketch is actually about to run.
+    const [{ default: p5 }, mod] = await Promise.all([
+      import("p5"),
+      loader() as Promise<{ default: Function }>,
+    ]);
+
+    const size = {
+      width: Number(el.dataset.width),
+      height: Number(el.dataset.height),
+    };
+
+    const instance = new p5((p: any) => {
+      mod.default(p, size, p5);
+      // Respect reduced-motion: render one frame, then stop animating.
+      if (prefersReducedMotion) {
+        const userSetup = p.setup;
+        p.setup = () => {
+          userSetup?.();
+          p.noLoop();
+        };
+      }
+    }, el);
+
+    // Pause offscreen sketches so several on one page don't compete for CPU.
+    if (!prefersReducedMotion) {
+      new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) instance.loop();
+          else instance.noLoop();
+        }
+      }).observe(el);
+    }
+  }
+
+  // Defer mounting until the sketch is near the viewport.
+  const lazy = new IntersectionObserver((entries, obs) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      obs.unobserve(entry.target);
+      mount(entry.target as HTMLElement);
+    }
+  }, { rootMargin: "200px" });
+
+  document
+    .querySelectorAll<HTMLElement>(".p5-sketch")
+    .forEach((el) => lazy.observe(el));
+</script>
