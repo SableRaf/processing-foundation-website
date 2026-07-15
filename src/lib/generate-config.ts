@@ -159,7 +159,7 @@ function buildCollection(def: CollectionDef): Record<string, unknown> {
 const baseConfig = {
   backend: {
     name: "github",
-    repo: "designsystemsinternational/processing-foundation-website",
+    repo: "SableRaf/processing-foundation-website",
     branch: "main",
   },
   // Lets the CMS admin use a local decap-server proxy
