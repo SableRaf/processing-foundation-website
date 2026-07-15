@@ -23,6 +23,14 @@
       "type": "block2",
       "title": "Get Involved",
       "description": "This is a block2 closing out the page."
+    },
+    {
+      "type": "p5sketch",
+      "sketch": "flocking",
+      "title": "Test",
+      "caption": "A test",
+      "width": 600,
+      "height": 400
     }
   ]
 }
